@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   ArrowDown,
   ArrowRight,
@@ -34,7 +35,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { scenarios, getSource, type ScenarioId } from '@/lib/scenarios';
-import { runComparison } from '@/lib/compare';
+import { getComparisonView } from '@/lib/comparison-view';
 import {
   buildJevRequest,
   getAssessment,
@@ -60,25 +61,12 @@ export default function UpgradeLab() {
   const controller = useRef<AbortController | null>(null);
   const scenario = scenarios.find((item) => item.id === selected)!;
   const safe = selected === 'profile' && guarded;
-  const comparison = useMemo(() => {
-    try {
-      const input: unknown = JSON.parse(inputText);
-      return {
-        input,
-        result: runComparison(selected, input, guarded),
-        error: '',
-      };
-    } catch {
-      return {
-        input: undefined,
-        result: null,
-        error: 'Enter valid JSON to compare the two versions.',
-      };
-    }
-  }, [selected, guarded, inputText]);
+  const comparison = useMemo(
+    () => getComparisonView(selected, inputText, guarded),
+    [selected, guarded, inputText],
+  );
   const result = comparison.result;
   const assessment = analysis ? getAssessment(analysis) : null;
-  const isOriginal = inputText === scenario.input;
 
   useEffect(
     () => () => {
@@ -192,13 +180,13 @@ export default function UpgradeLab() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="/" aria-label="Upgrade Lens home">
+        <Link className="brand" href="/" aria-label="Upgrade Lens home">
           <span className="brand-mark">
             <ScanLine size={23} />
           </span>
           upgrade<span className="brand-light">lens</span>
           <span className="beta">LAB</span>
-        </a>
+        </Link>
         <div className="header-links">
           <a href="#how-it-works">
             How it works <ArrowUpRight size={14} />
@@ -315,11 +303,7 @@ export default function UpgradeLab() {
               </div>
             </div>
             <div className="bench-toolbar">
-              <div
-                className="view-tabs"
-                role="group"
-                aria-label="Comparison view"
-              >
+              <fieldset className="view-tabs" aria-label="Comparison view">
                 <Button
                   variant="ghost"
                   className={tab === 'behavior' ? 'active' : ''}
@@ -338,7 +322,7 @@ export default function UpgradeLab() {
                   <Code2 size={15} />
                   The code
                 </Button>
-              </div>
+              </fieldset>
               {selected === 'profile' && (
                 <label className="safe-toggle">
                   <input
@@ -443,12 +427,7 @@ export default function UpgradeLab() {
                 )}
                 <div className="comparison-note">
                   <CircleHelp size={14} />
-                  <span>
-                    Executed with Zod 3 & 4.{' '}
-                    {result?.changed
-                      ? 'The final application result differs.'
-                      : 'The final application result is the same for this input.'}
-                  </span>
+                  <span>{comparison.note}</span>
                 </div>
               </div>
             ) : (
@@ -540,9 +519,7 @@ export default function UpgradeLab() {
                   ? 'JEV IS EVALUATING'
                   : assessment
                     ? assessment.label
-                    : result?.changed
-                      ? 'OBSERVED BEHAVIOR CHANGE'
-                      : 'NO OBSERVED IMPACT'}
+                    : comparison.label}
               </span>
               <span className={`example-label ${analysis ? 'live-label' : ''}`}>
                 {analysis ? 'Live Jev response' : 'Authored guide · no AI call'}
@@ -559,25 +536,9 @@ export default function UpgradeLab() {
               </div>
             ) : (
               <>
-                <h3>
-                  {assessment
-                    ? assessment.title
-                    : safe
-                      ? 'Different data. Same displayed name.'
-                      : isOriginal
-                        ? scenario.finding
-                        : result?.changed
-                          ? 'Your input changes the outcome.'
-                          : 'Same outcome for this input.'}
-                </h3>
+                <h3>{assessment ? assessment.title : comparison.title}</h3>
                 <p>
-                  {assessment
-                    ? assessment.description
-                    : safe
-                      ? 'Both versions display the same name because the consumer already supplies a fallback. This example shows why the surrounding code matters.'
-                      : isOriginal
-                        ? scenario.explanation
-                        : 'The panels above show the actual results for your input. Ask Jev to independently assess the migration note and application source.'}
+                  {assessment ? assessment.description : comparison.description}
                 </p>
               </>
             )}
@@ -603,11 +564,7 @@ export default function UpgradeLab() {
                         <span>{questionLabels[id]}</span>
                         <strong>{answerLabels[answer.choice]}</strong>
                       </div>
-                      <div
-                        className="probability-track"
-                        role="img"
-                        aria-label={`Yes ${Math.round(answer.probabilities.yes * 100)}%, no ${Math.round(answer.probabilities.no * 100)}%, insufficient context ${Math.round(answer.probabilities.insufficient_context * 100)}%`}
-                      >
+                      <div className="probability-track" aria-hidden="true">
                         <span
                           className="prob-yes"
                           style={{
@@ -679,13 +636,17 @@ export default function UpgradeLab() {
             context. The prose in the guide is authored; Jev returns the
             decisions and probabilities.
           </p>
-          <pre>
-            {JSON.stringify(
-              buildJevRequest(selected, comparison.input ?? null, guarded),
-              null,
-              2,
-            )}
-          </pre>
+          {result ? (
+            <pre>
+              {JSON.stringify(
+                buildJevRequest(selected, comparison.input, guarded),
+                null,
+                2,
+              )}
+            </pre>
+          ) : (
+            <p>Enter valid JSON to preview the Jev request.</p>
+          )}
         </details>
         <section className="how-section" id="how-it-works">
           <div className="how-heading">

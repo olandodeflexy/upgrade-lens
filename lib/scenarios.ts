@@ -67,8 +67,8 @@ export const scenarios = [
 export function getSource(id: ScenarioId, guarded = false) {
   if (id === 'profile')
     return guarded
-      ? `const schema = z.object({\n  name: z.string().default("Guest").optional(),\n});\n\nconst parsed = schema.parse(input);\nconst displayName = parsed.name ?? "Guest";\nreturn { displayName };`
-      : `const profile = { name: "Ama" };\nconst schema = z.object({\n  name: z.string().default("Guest").optional(),\n});\n\nconst parsed = schema.parse(input);\nObject.assign(profile, parsed);\nreturn profile;`;
+      ? `const schema = z.object({\n  name: z.string().default("Guest").optional(),\n});\nconst result = schema.safeParse(input);\n\nif (!result.success) {\n  return { status: "rejected" };\n}\nconst displayName = result.data.name ?? "Guest";\nreturn { displayName };`
+      : `const profile = { name: "Ama" };\nconst schema = z.object({\n  name: z.string().default("Guest").optional(),\n});\nconst result = schema.safeParse(input);\n\nif (!result.success) {\n  return { status: "rejected" };\n}\nObject.assign(profile, result.data);\nreturn profile;`;
   if (id === 'price')
     return `const price = z.number().safe();\nconst result = price.safeParse(input);\n\nif (!result.success) {\n  return { status: "rejected" };\n}\nreturn { status: "accepted", price: result.data };`;
   return `const preferences = z.record(\n  z.enum(["email", "sms"]),\n  z.boolean(),\n);\nconst result = preferences.safeParse(input);\n\nif (!result.success) {\n  return { status: "rejected" };\n}\nreturn { status: "updated", patch: result.data };`;

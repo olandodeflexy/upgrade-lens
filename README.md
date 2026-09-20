@@ -47,22 +47,6 @@ Tests execute the real library comparisons. API transport tests use explicitly m
 5. Expand **What exactly does Jev see?** to show the typed questions and context.
 6. Export a report; its provenance states whether it contains a live response.
 
-## LinkedIn draft
-
-Use after completing a real Jev run:
-
-> I built Upgrade Lens, a small TypeScript demo exploring a question that comes up during dependency upgrades: a library's behavior changed—but does it actually affect this code?
->
-> It runs the same input through Zod 3 and 4, then asks TypeSafe Jev three focused questions about the API usage, trigger condition, and application result.
->
-> My favorite example: an optional default changes the parsed data in both cases, but only one consumer ends up with a different result. Context matters.
->
-> Jev returns typed decisions and probabilities. The app shows those alongside the executed behavior, so you can inspect the judgment yourself.
->
-> A focused experiment with three examples, built to learn by shipping.
-
-If a real Jev run has not been completed, describe it as an integration-ready demo and say live verification is pending.
-
 ## Sources
 
 - https://zod.dev/v4/changelog

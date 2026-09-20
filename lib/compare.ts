@@ -9,6 +9,7 @@ const oldSchemas = {
 };
 const newSchemas = {
   profile: z4.object({ name: z4.string().default('Guest').optional() }),
+  // oxlint-disable-next-line typescript/no-deprecated -- This fixture demonstrates the changed behavior of the legacy .safe() API.
   price: z4.number().safe(),
   preferences: z4.record(z4.enum(['email', 'sms']), z4.boolean()),
 };
@@ -70,7 +71,9 @@ function consume(
     output: { success: true, data: result.data },
     consumer,
     outcome:
-      id === 'price' ? `Price accepted: ${result.data}` : 'Preferences updated',
+      id === 'price'
+        ? `Price accepted: ${String(result.data)}`
+        : 'Preferences updated',
   };
 }
 

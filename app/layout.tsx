@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://upgrade-lens.olando111.chatgpt.site'),
+  metadataBase: new URL('http://localhost:3000'),
   title: 'Upgrade Lens — Same code. Different behavior.',
   description:
     'Explore real Zod upgrade changes and use TypeSafe Jev to judge their impact on application code.',
@@ -23,10 +23,9 @@ export const metadata: Metadata = {
     title: 'Upgrade Lens — Same code. Different behavior.',
     description:
       'Run the same input through Zod 3 and 4. Let Jev judge whether the change matters to your application.',
-    url: 'https://upgrade-lens.olando111.chatgpt.site',
     images: [
       {
-        url: 'https://upgrade-lens.olando111.chatgpt.site/og.png',
+        url: '/og.png',
         alt: 'Upgrade Lens. Same code. Different behavior. Built with Jev.',
       },
     ],
@@ -36,7 +35,7 @@ export const metadata: Metadata = {
     title: 'Upgrade Lens — Same code. Different behavior.',
     description:
       'Three real Zod upgrade changes. Typed decisions from Jev. A small experiment in better dependency reviews.',
-    images: ['https://upgrade-lens.olando111.chatgpt.site/og.png'],
+    images: ['/og.png'],
   },
 };
 
